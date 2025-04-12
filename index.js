@@ -53,7 +53,7 @@ app.get('/api/courss/:idcours' , (req ,res) => {
         const coursID = req.params.idcours;
         const cours = courses.find((cours) =>  cours.id === coursID )
         if(!cours){
-                res.json({msg: "cours not found"})
+                return res.status(404).json({msg: "cours not found"})
         }
         res.json(cours)
         console.log(req.params.idcours)
@@ -62,15 +62,6 @@ app.get('/api/courss/:idcours' , (req ,res) => {
 
 
 
-
-
-
-
-
-
-
-
-
 app.listen(5000, () => {
         console.log('listen in port 500')
-})
+})  
