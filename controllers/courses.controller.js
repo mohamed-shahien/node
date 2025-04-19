@@ -9,16 +9,15 @@ const getCours = async (req, res) => {
         const page = Qery.page || 1;
         const skip = (page - 1) * limet;
         try {
-                const courses = await course.find({}, {"__v": false}).limit(limet).skip(skip)
+                const courses = await course.find({}, { "__v": false }).limit(limet).skip(skip)
                 return res.status(200).json({ status: SUCCESS, data: { courses } })
         } catch (arror) {
                 return res.status(400).json({ status: ERROR, Code: 400, data: null, message: arror.message })
         }
-
 }
 const gatSingleCourse = async (req, res) => {
         try {
-                const cours = await course.findById(req.params.idcours)
+                const cours = await course.findById(req.params.id)
                 if (!cours) {
                         return res.status(404).json({ status: FAIL, data: { title: "thes course not found" } })
                 }
@@ -32,12 +31,12 @@ const addCourse = async (req, res) => {
         if (!errors.isEmpty()) {
                 return res.status(400).json({ status: ERROR, Code: 400, data: errors.array() })
         }
-        const newCourse = new course(req.body) 
+        const newCourse = new course(req.body)
         await newCourse.save()
         res.status(200).json({ status: SUCCESS, data: { newCourse } })
 }
 const updataCourse = async (req, res) => {
-        const coursID = req.params.idcours;
+        const coursID = req.params.id;
         try {
                 const updataCourse = await course.updateOne({ _id: coursID }, { $set: { ...req.body } })
                 res.status(200).json({ status: SUCCESS, data: { updataCourse } })
@@ -46,7 +45,7 @@ const updataCourse = async (req, res) => {
         }
 }
 const deleteCourse = async (req, res) => {
-        const data = await course.deleteOne({ _id: req.params.idcours },)
+        const data = await course.deleteOne({ _id: req.params.id },)
         res.status(200).json({ status: SUCCESS, data: { data } });
 }
 
