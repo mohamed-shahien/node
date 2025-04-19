@@ -1,65 +1,58 @@
 
 const { validationResult } = require('express-validator');
 const course = require('../models/course.model')
-const { SUCCESS, FAIL, ERROR } = require('../utils/httpsStatus');
+const { SUCCESS, FAIL } = require('../utils/httpsStatus');
+const asyncWraper = require('../middlewares/asyncWraper');
+const appError = require('../utils/appError');
 
-const getCours = async (req, res) => {
-        let Qery = req.query;
-        const limet = Qery.limit || 4;
-        const page = Qery.page || 1;
-        const skip = (page - 1) * limet;
-        try {
-                const courses = await course.find({}, { "__v": false }).limit(limet).skip(skip)
+const getCours = asyncWraper(
+        async (req, res, next) => {
+                let Qery = req.query;
+                const limit = Qery.limit;
+                const page = Qery.page;
+                let courses;
+                if (limit > 0) {
+                        const skip = (page - 1) * limit;
+                        courses = await course.find({}, { "__v": false }).limit(limit).skip(skip)
+                } else {
+                        courses = await course.find({}, { "__v": false })
+                }
                 return res.status(200).json({ status: SUCCESS, data: { courses } })
-        } catch (arror) {
-                return res.status(400).json({ status: ERROR, Code: 400, data: null, message: arror.message })
         }
-}
-const gatSingleCourse = async (req, res) => {
-        try {
+)
+const gatSingleCourse = asyncWraper(
+        async (req, res, next) => {
                 const cours = await course.findById(req.params.id)
                 if (!cours) {
-                        return res.status(404).json({ status: FAIL, data: { title: "thes course not found" } })
+                        const error = appError.ccreate("course not found", 404, FAIL)
+                        return next(error)
                 }
                 return res.status(200).json({ status: SUCCESS, data: { cours } })
-        } catch (err) {
-                return res.status(400).json({ status: ERROR, message: err.message, Code: 400, data: null })
         }
-}
-const addCourse = async (req, res) => {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-                return res.status(400).json({ status: ERROR, Code: 400, data: errors.array() })
+)
+const addCourse = asyncWraper(
+        async (req, res, next) => {
+                const errors = validationResult(req);
+                if (!errors.isEmpty()) {
+                        const error = appError.ccreate("validation error", 400, FAIL)
+                        return next(error)
+                }
+                const newCourse = new course(req.body)
+                await newCourse.save()
+                return res.status(200).json({ status: SUCCESS, data: { newCourse } })
         }
-        const newCourse = new course(req.body)
-        await newCourse.save()
-        res.status(200).json({ status: SUCCESS, data: { newCourse } })
-}
-const updataCourse = async (req, res) => {
-        const coursID = req.params.id;
-        try {
+)
+const updataCourse = asyncWraper(
+        async (req, res) => {
+                const coursID = req.params.id;
                 const updataCourse = await course.updateOne({ _id: coursID }, { $set: { ...req.body } })
-                res.status(200).json({ status: SUCCESS, data: { updataCourse } })
-        } catch (err) {
-                return res.status(400).json({ status: ERROR, message: err.message, Code: 400, data: null })
+                return res.status(200).json({ status: SUCCESS, data: { updataCourse } })
         }
-}
-const deleteCourse = async (req, res) => {
-        const data = await course.deleteOne({ _id: req.params.id },)
-        res.status(200).json({ status: SUCCESS, data: { data } });
-}
-
-
+)
+const deleteCourse = asyncWraper(
+        async (req, res) => {
+                const data = await course.deleteOne({ _id: req.params.id },)
+                return res.status(200).json({ status: SUCCESS, data: { data } });
+        }
+)
 module.exports = { getCours, gatSingleCourse, addCourse, updataCourse, deleteCourse }
-
-
-
-
-// fetch("http://localhost:5000/api/courses")
-//         .then((res) => res.json())
-//         .then((data) => {
-//                 console.log(data)
-//         })
-//         .catch((err) => {
-//                 console.error("Fetch error:", err);
-//         });
