@@ -24,7 +24,7 @@ const gatSingleCourse = asyncWraper(
         async (req, res, next) => {
                 const cours = await course.findById(req.params.id)
                 if (!cours) {
-                        const error = appError.ccreate("course not found", 404, FAIL)
+                        const error = appError.create("course not found", 404, FAIL)
                         return next(error)
                 }
                 return res.status(200).json({ status: SUCCESS, data: { cours } })
@@ -34,7 +34,7 @@ const addCourse = asyncWraper(
         async (req, res, next) => {
                 const errors = validationResult(req);
                 if (!errors.isEmpty()) {
-                        const error = appError.ccreate("validation error", 400, FAIL)
+                        const error = appError.create("validation error", 400, FAIL)
                         return next(error)
                 }
                 const newCourse = new course(req.body)

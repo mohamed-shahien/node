@@ -1,28 +1,28 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
-
 const userSchema = new mongoose.Schema({
         firstName: {
                 type: String,
-                required: [true, 'First name is required']
+                required: true
         },
         lastName: {
                 type: String,
-                required: [true, 'Last name is required']
+                required: true
         },
         email: {
                 type: String,
-                required: [true, 'Email is required'],
+                required: true,
                 unique: true,
-                validate: {
-                        validator: validator.isEmail,
-                        message: 'Field must be a valid email'
-                }
+                validate: [validator.isEmail, 'filed must be a valid email address']
         },
         password: {
                 type: String,
-                required: [true, 'Password is required']
+                required: true
+        },
+        token: {
+                type: String,
+                default: null
         }
-});
+})
 
 module.exports = mongoose.model('User', userSchema);

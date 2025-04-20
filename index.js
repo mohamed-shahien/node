@@ -21,7 +21,7 @@ app.all('*', (req, res, next) => {
         return res.status(404).json({ status: ERROR, Code: 404, data: null, message: "the source not available " });
 });
 app.use((error, req, res, next) => {
-        return res.status(error.statusCode || 500).json({ status: error.statusetext || ERROR, message: "course not found", code : error.statusCode || 500 , data: null });
+        return res.status(error.statusCode || 500).json({ status: error.statusetext || ERROR, message: error.message, code : error.statusCode || 500 , data: null });
 });
 app.listen(process.env.PORT || 4000, () => {
         console.log('listening on port ' + (process.env.PORT || 4000))
